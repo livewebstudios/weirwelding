@@ -379,6 +379,29 @@ p + p { margin-top: 1rem; }
   height: 100%;
   object-fit: cover;
 }
+/* Taller banner so the photo reads at a larger scale. */
+.page-hero--tall { min-height: 68vh; }
+/* Lifts underexposed shop/yard photography. The overlay is deepened to match,
+   so opening up the shadows does not cost the overlaid copy its contrast. */
+.page-hero--bright .page-hero__bg img { filter: brightness(1.22) contrast(0.97); }
+.page-hero--bright .page-hero__overlay {
+  background: linear-gradient(180deg, rgba(30,32,40,0.52), rgba(30,32,40,0.66));
+}
+/* The Weir sign panorama (2947x995) drives the banner height, so the photo runs
+   full width at its own aspect ratio and the sign is never cropped. */
+.page-hero--sign {
+  min-height: 0;
+  aspect-ratio: 2947 / 995;
+  max-height: 72vh;
+  background: var(--color-charcoal-deep);
+}
+/* Sign sits in the lower third of the frame; keep the copy off it. */
+.page-hero--sign .page-hero__content { padding-top: 0; padding-bottom: 7rem; }
+@media (max-width: 768px) {
+  /* Too short to hold the copy once the panorama narrows; give it a floor. */
+  .page-hero--sign { aspect-ratio: auto; min-height: 52vh; }
+  .page-hero--sign .page-hero__content { padding-top: 4rem; padding-bottom: 0; }
+}
 .page-hero__overlay {
   position: absolute;
   inset: 0;
@@ -566,6 +589,11 @@ p + p { margin-top: 1rem; }
   overflow: hidden;
   background: var(--color-charcoal-deep);
 }
+/* Taller band so a portrait-ish photo gets vertical room instead of being
+   cropped to a letterbox strip. */
+.parallax-section--tall { min-height: 82vh; }
+/* Breathing room above and below the photo within the band. */
+.parallax-section--padded { padding: 4rem 0; }
 .parallax-section__bg {
   position: absolute;
   inset: -20% 0;
@@ -623,7 +651,7 @@ p + p { margin-top: 1rem; }
 }
 .quote-block__text::after {
   content: '\201D';
-  bottom: -2.75rem;
+  top: -1.5rem;
   right: -1rem;
 }
 .quote-block__author {
@@ -1058,6 +1086,13 @@ p + p { margin-top: 1rem; }
   margin-bottom: 0.3rem;
   color: var(--color-text-body);
 }
+/* Subtitle under a facility name, e.g. "Corporate Office": address-size, bold.
+   Used in the footer and in the contact page office cards. */
+.office-sub {
+  font-weight: 700;
+  color: var(--color-charcoal-deep);
+  margin-bottom: 0.5rem;
+}
 .footer__office a { color: var(--color-maroon); }
 .footer__office a:hover { text-decoration: underline; }
 
@@ -1073,6 +1108,14 @@ p + p { margin-top: 1rem; }
   margin-bottom: 0.25rem;
 }
 .footer__memberships span { font-weight: 600; color: var(--color-charcoal-deep); }
+.footer__memberships .footer__aisc {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-maroon);
+  text-transform: uppercase;
+}
 
 .footer__bottom {
   text-align: center;
