@@ -381,11 +381,21 @@ p + p { margin-top: 1rem; }
 }
 /* Taller banner so the photo reads at a larger scale. */
 .page-hero--tall { min-height: 68vh; }
-/* Lifts underexposed shop/yard photography. The overlay is deepened to match,
-   so opening up the shadows does not cost the overlaid copy its contrast. */
-.page-hero--bright .page-hero__bg img { filter: brightness(1.22) contrast(0.97); }
+/* Brightens the photo toward the original the client sent, then shades ONLY the
+   center where the heading sits (a soft radial) instead of a flat dark wash, so
+   the edges of the picture read at true brightness. Text-shadow keeps the
+   centered copy legible over the brighter image. */
+.page-hero--bright .page-hero__bg img {
+  filter: brightness(1.2) contrast(0.98) saturate(1.04);
+}
 .page-hero--bright .page-hero__overlay {
-  background: linear-gradient(180deg, rgba(30,32,40,0.52), rgba(30,32,40,0.66));
+  background: radial-gradient(ellipse 92% 82% at 50% 50%,
+    rgba(30,32,40,0.54) 0%,
+    rgba(30,32,40,0.34) 46%,
+    rgba(30,32,40,0.10) 100%);
+}
+.page-hero--bright .page-hero__content {
+  text-shadow: 0 2px 18px rgba(0,0,0,0.55);
 }
 /* The Weir sign panorama (2947x995) drives the banner height, so the photo runs
    full width at its own aspect ratio and the sign is never cropped. */
@@ -602,16 +612,24 @@ p + p { margin-top: 1rem; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: brightness(1.1) contrast(0.98);
 }
+/* Copy sits in a left-hand column, so shade the left and let the right side of
+   the photo (flag, sign, trucks) show at true brightness instead of a flat wash. */
 .parallax-section__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(30,32,40,0.55), rgba(30,32,40,0.30));
+  background: linear-gradient(90deg,
+    rgba(30,32,40,0.74) 0%,
+    rgba(30,32,40,0.56) 30%,
+    rgba(30,32,40,0.18) 62%,
+    rgba(30,32,40,0.04) 100%);
 }
 .parallax-section__content {
   position: relative;
   z-index: 2;
   color: var(--color-white);
+  text-shadow: 0 2px 16px rgba(0,0,0,0.5);
 }
 .parallax-section h1, .parallax-section h2, .parallax-section h3 { color: var(--color-white); }
 .parallax-section p { color: rgba(255,255,255,0.92); }
