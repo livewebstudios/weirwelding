@@ -44,6 +44,43 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --transition: 0.4s var(--ease);
   --transition-slow: 0.8s var(--ease);
+
+  /* --- PHOTO SCRIM TOKENS ---------------------------------------------
+     RULE: a photo carries a scrim IF AND ONLY IF copy is rendered on top
+     of it. Every other photo renders clean, at full brightness, with no
+     tint layer and no filter.
+
+     The scrim is a gradient layer over a clean source file, never a baked
+     darkened JPEG, so it stays tunable. It is strong only where the copy
+     actually sits and falls away to --scrim-edge so the rest of the
+     picture reads at true brightness. Override the tokens per photo on
+     the section: there is deliberately no single global value.
+
+       --scrim-peak   alpha directly beneath the copy
+       --scrim-edge   alpha at the far side of the frame
+       --photo-lift   per-photo brightness, 1 = untouched source
+       --scrim-rx/ry  radii of the centred scrim, as % of the frame
+       --scrim-cx/cy  where the scrim centres, so it can sit off the
+                      subject of the picture (the Weir sign, for one)
+     ------------------------------------------------------------------ */
+  --scrim-tint: 30, 32, 40;
+  --scrim-peak: 0.72;
+  --scrim-edge: 0.06;
+  --photo-lift: 1;
+  --scrim-rx: 62%;
+  --scrim-ry: 96%;
+  --scrim-cx: 50%;
+  --scrim-cy: 50%;
+  /* Vertical reach of the narrow-screen band, where the scrim runs full width. */
+  --scrim-ry-narrow: 74%;
+  --scrim-cy-narrow: 50%;
+
+  /* Gold label wherever it sits on a photo. Lifted from the flat-background
+     gold (#d9b85a) because at 14px that value only clears 4.5:1 against a
+     near-black backing: holding the brand gold here would have meant scrimming
+     every photo almost opaque. This keeps the photos bright and the label
+     legible, and applies ONLY over photos. Flat backgrounds keep #d9b85a. */
+  --color-eyebrow-on-photo: #e8cf8f;
 }
 
 /* --- RESET --- */
@@ -303,16 +340,23 @@ p + p { margin-top: 1rem; }
   from { transform: scale(1); }
   to { transform: scale(1.08); }
 }
+/* Copy sits in a left-hand column, so the scrim is weighted left and released
+   across the right of the frame where the photo carries the picture. */
 .hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(30,32,40,0.45) 0%,
-    rgba(30,32,40,0.20) 40%,
-    rgba(30,32,40,0.05) 100%
-  );
+  background: linear-gradient(90deg,
+    rgba(var(--scrim-tint), var(--scrim-peak)) 0%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.97)) 56%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.30)) 80%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 93%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
 }
+/* The four slides are different exposures, so the scrim is set by whichever of
+   them needs the most: slide 4 (bridge crane, open sky) drives the value.
+   On a phone this hero's copy runs from 6% to 92% of the frame, so the narrow
+   band has to reach top to bottom here: there is no clear picture left to hold. */
+.hero { --scrim-peak: 0.80; --scrim-edge: 0.05; --scrim-ry-narrow: 104%; }
 .hero__content {
   position: relative;
   z-index: 2;
@@ -325,7 +369,7 @@ p + p { margin-top: 1rem; }
   font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #d9b85a;
+  color: var(--color-eyebrow-on-photo);
   margin-bottom: 1rem;
 }
 .hero h1, .hero h2, .hero h3 { color: var(--color-white); }
@@ -378,25 +422,10 @@ p + p { margin-top: 1rem; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: brightness(var(--photo-lift));
 }
 /* Taller banner so the photo reads at a larger scale. */
 .page-hero--tall { min-height: 68vh; }
-/* Brightens the photo toward the original the client sent, then shades ONLY the
-   center where the heading sits (a soft radial) instead of a flat dark wash, so
-   the edges of the picture read at true brightness. Text-shadow keeps the
-   centered copy legible over the brighter image. */
-.page-hero--bright .page-hero__bg img {
-  filter: brightness(1.2) contrast(0.98) saturate(1.04);
-}
-.page-hero--bright .page-hero__overlay {
-  background: radial-gradient(ellipse 92% 82% at 50% 50%,
-    rgba(30,32,40,0.54) 0%,
-    rgba(30,32,40,0.34) 46%,
-    rgba(30,32,40,0.10) 100%);
-}
-.page-hero--bright .page-hero__content {
-  text-shadow: 0 2px 18px rgba(0,0,0,0.55);
-}
 /* The Weir sign panorama (2947x995) drives the banner height, so the photo runs
    full width at its own aspect ratio and the sign is never cropped. */
 .page-hero--sign {
@@ -412,15 +441,39 @@ p + p { margin-top: 1rem; }
   .page-hero--sign { aspect-ratio: auto; min-height: 52vh; }
   .page-hero--sign .page-hero__content { padding-top: 4rem; padding-bottom: 0; }
 }
+/* Inner-page copy is centred, so the scrim is a soft centred ellipse rather
+   than a flat wash: the middle carries the heading, the edges of the picture
+   stay at true brightness. Tuned per photo via the modifiers below. */
 .page-hero__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(30,32,40,0.35), rgba(30,32,40,0.55));
+  background: radial-gradient(ellipse var(--scrim-rx) var(--scrim-ry) at var(--scrim-cx) var(--scrim-cy),
+    rgba(var(--scrim-tint), var(--scrim-peak)) 0%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.96)) 46%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.34)) 76%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 92%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
 }
+/* Per-photo scrim strength. Each value is the lowest that holds 4.5:1 for body
+   copy and 3:1 for the display heading over that specific picture, measured
+   against the actual pixels under each line of type, plus a small margin for
+   the narrower breakpoints. No photo is darkened more than its own exposure
+   requires, which is why these values are all different. */
+/* The sign is the subject and sits in the lower third, so this scrim rides
+   above it: centred at 42% with a shorter vertical radius, releasing the
+   bottom of the frame where the sign actually is. */
+.page-hero--sign     { --scrim-peak: 0.50; --scrim-edge: 0.12;
+                       --scrim-ry: 62%; --scrim-cy: 42%; }  /* weir-sign, dusk */
+.page-hero--contact  { --scrim-peak: 0.74; --scrim-edge: 0.10; }  /* shop-interior-beams */
+.page-hero--services { --scrim-peak: 0.74; --scrim-edge: 0.08; }  /* fabrication-shop-interior */
+.page-hero--projects { --scrim-peak: 0.78; --scrim-edge: 0.08; }  /* clifton-yards, open sky */
+.page-hero--plants   { --scrim-peak: 0.80; --scrim-edge: 0.08; }  /* bethlehem aerial, brightest */
+
 .page-hero__content {
   position: relative;
   z-index: 2;
   padding-top: 5rem;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.55);
 }
 .page-hero__eyebrow {
   display: block;
@@ -428,7 +481,7 @@ p + p { margin-top: 1rem; }
   font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #d9b85a;
+  color: var(--color-eyebrow-on-photo);
   margin-bottom: 0.5rem;
 }
 .page-hero h1, .page-hero h2, .page-hero h3 { color: var(--color-white); }
@@ -443,7 +496,7 @@ p + p { margin-top: 1rem; }
   color: rgba(255,255,255,0.85);
   margin-top: 1rem;
 }
-.breadcrumb a { color: #d9b85a; }
+.breadcrumb a { color: var(--color-eyebrow-on-photo); }
 .breadcrumb a:hover { text-decoration: underline; }
 .breadcrumb span { margin: 0 0.5rem; color: rgba(255,255,255,0.6); }
 
@@ -612,7 +665,7 @@ p + p { margin-top: 1rem; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(1.1) contrast(0.98);
+  filter: brightness(var(--photo-lift));
 }
 /* Copy sits in a left-hand column, so shade the left and let the right side of
    the photo (flag, sign, trucks) show at true brightness instead of a flat wash. */
@@ -620,10 +673,48 @@ p + p { margin-top: 1rem; }
   position: absolute;
   inset: 0;
   background: linear-gradient(90deg,
-    rgba(30,32,40,0.74) 0%,
-    rgba(30,32,40,0.56) 30%,
-    rgba(30,32,40,0.18) 62%,
-    rgba(30,32,40,0.04) 100%);
+    rgba(var(--scrim-tint), var(--scrim-peak)) 0%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.96)) 50%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.28)) 76%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 92%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
+}
+/* Where the band centres its copy instead, the scrim has to centre with it or
+   the heading runs off the shaded side of the frame. */
+.parallax-section:has(.parallax-section__content.text-center) .parallax-section__overlay {
+  background: radial-gradient(ellipse 82% 78% at 50% 50%,
+    rgba(var(--scrim-tint), var(--scrim-peak)) 0%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.94)) 52%,
+    rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.38)) 80%,
+    rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
+}
+/* Per-photo scrim strength for the image bands. */
+.parallax-section--topping     { --scrim-peak: 0.80; --scrim-edge: 0.04; }
+.parallax-section--fleet       { --scrim-peak: 0.78; --scrim-edge: 0.04; }
+.parallax-section--connections { --scrim-peak: 0.64; --scrim-edge: 0.06; }
+
+/* Below the column breakpoint the copy stops sitting in a lane and runs the
+   full width, so there is no clean side left to release. The scrim turns into a
+   horizontal band instead: full strength across the width where the type is,
+   releasing at the top and bottom of the frame so the picture still opens up
+   above and below the copy rather than going flat under one wash. Strength is
+   still each photo's own token. */
+@media (max-width: 1024px) {
+  .hero__overlay,
+  .page-hero__overlay,
+  .parallax-section__overlay,
+  .parallax-section:has(.parallax-section__content.text-center) .parallax-section__overlay {
+    background: radial-gradient(ellipse 150% var(--scrim-ry-narrow) at 50% var(--scrim-cy-narrow),
+      rgba(var(--scrim-tint), var(--scrim-peak)) 0%,
+      rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.96)) 54%,
+      rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.40)) 84%,
+      rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
+  }
+}
+/* The eyebrow rides the same photo as the heading, so it takes the on-photo
+   colour rather than the maroon used against flat page backgrounds. */
+.parallax-section__content .section-header__eyebrow {
+  color: var(--color-eyebrow-on-photo);
 }
 .parallax-section__content {
   position: relative;
