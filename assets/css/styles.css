@@ -75,12 +75,31 @@
   --scrim-ry-narrow: 74%;
   --scrim-cy-narrow: 50%;
 
-  /* Gold label wherever it sits on a photo. Lifted from the flat-background
-     gold (#d9b85a) because at 14px that value only clears 4.5:1 against a
-     near-black backing: holding the brand gold here would have meant scrimming
-     every photo almost opaque. This keeps the photos bright and the label
-     legible, and applies ONLY over photos. Flat backgrounds keep #d9b85a. */
-  --color-eyebrow-on-photo: #e8cf8f;
+  /* A tight dark halo hugging the glyphs, so type stays readable on a photo
+     without a heavy scrim flattening the picture behind it. Sized in em so it
+     scales with each element: a small glow on a 14px label, a bigger one on the
+     display heading. This carries the legibility now; the scrims above are only
+     a whisper of tint. */
+  --text-glow:
+    0 0 3px rgba(0,0,0,0.95),
+    0 0 7px rgba(0,0,0,0.88),
+    0 0 15px rgba(0,0,0,0.75),
+    0 0 30px rgba(0,0,0,0.5),
+    0 1px 3px rgba(0,0,0,0.95);
+
+  /* The small gold labels are the hardest case on a bright photo: mid-tone type
+     at 14px. They get a denser halo held in close, which reads as an edge on the
+     letterforms rather than a shadow behind them. */
+  --text-glow-label:
+    0 0 2px rgba(0,0,0,1),
+    0 0 4px rgba(0,0,0,0.98),
+    0 0 9px rgba(0,0,0,0.9),
+    0 0 18px rgba(0,0,0,0.7),
+    0 1px 2px rgba(0,0,0,1);
+
+  /* Gold label wherever it sits on a photo. Back to the brand gold: the reason
+     it was lifted was to survive a heavy scrim, and the scrims are now light. */
+  --color-eyebrow-on-photo: #d9b85a;
 }
 
 /* --- RESET --- */
@@ -352,16 +371,13 @@ p + p { margin-top: 1rem; }
     rgba(var(--scrim-tint), var(--scrim-edge)) 93%,
     rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
 }
-/* The four slides are different exposures, so the scrim is set by whichever of
-   them needs the most: slide 4 (bridge crane, open sky) drives the value.
-   On a phone this hero's copy runs from 6% to 92% of the frame, so the narrow
-   band has to reach top to bottom here: there is no clear picture left to hold. */
-.hero { --scrim-peak: 0.80; --scrim-edge: 0.05; --scrim-ry-narrow: 104%; }
+.hero { --scrim-peak: 0.24; --scrim-edge: 0.04; --scrim-ry-narrow: 104%; }
 .hero__content {
   position: relative;
   z-index: 2;
   max-width: 750px;
   padding-top: 5rem;
+  text-shadow: var(--text-glow);
 }
 .hero__eyebrow {
   display: block;
@@ -454,26 +470,23 @@ p + p { margin-top: 1rem; }
     rgba(var(--scrim-tint), var(--scrim-edge)) 92%,
     rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
 }
-/* Per-photo scrim strength. Each value is the lowest that holds 4.5:1 for body
-   copy and 3:1 for the display heading over that specific picture, measured
-   against the actual pixels under each line of type, plus a small margin for
-   the narrower breakpoints. No photo is darkened more than its own exposure
-   requires, which is why these values are all different. */
-/* The sign is the subject and sits in the lower third, so this scrim rides
-   above it: centred at 42% with a shorter vertical radius, releasing the
-   bottom of the frame where the sign actually is. */
-.page-hero--sign     { --scrim-peak: 0.50; --scrim-edge: 0.12;
+/* Per-photo tint. These are deliberately light: the photo is the point, and
+   --text-glow is what keeps the type readable. Values differ per picture only
+   so the brightest photos get a touch more help than the dusk ones. */
+/* The sign is the subject and sits in the lower third, so what tint there is
+   rides above it, releasing the bottom of the frame where the sign actually is. */
+.page-hero--sign     { --scrim-peak: 0.16; --scrim-edge: 0.06;
                        --scrim-ry: 62%; --scrim-cy: 42%; }  /* weir-sign, dusk */
-.page-hero--contact  { --scrim-peak: 0.74; --scrim-edge: 0.10; }  /* shop-interior-beams */
-.page-hero--services { --scrim-peak: 0.74; --scrim-edge: 0.08; }  /* fabrication-shop-interior */
-.page-hero--projects { --scrim-peak: 0.78; --scrim-edge: 0.08; }  /* clifton-yards, open sky */
-.page-hero--plants   { --scrim-peak: 0.80; --scrim-edge: 0.08; }  /* bethlehem aerial, brightest */
+.page-hero--contact  { --scrim-peak: 0.22; --scrim-edge: 0.06; }  /* shop-interior-beams */
+.page-hero--services { --scrim-peak: 0.22; --scrim-edge: 0.06; }  /* fabrication-shop-interior */
+.page-hero--projects { --scrim-peak: 0.26; --scrim-edge: 0.06; }  /* clifton-yards, open sky */
+.page-hero--plants   { --scrim-peak: 0.28; --scrim-edge: 0.06; }  /* bethlehem aerial, brightest */
 
 .page-hero__content {
   position: relative;
   z-index: 2;
   padding-top: 5rem;
-  text-shadow: 0 2px 18px rgba(0,0,0,0.55);
+  text-shadow: var(--text-glow);
 }
 .page-hero__eyebrow {
   display: block;
@@ -497,6 +510,14 @@ p + p { margin-top: 1rem; }
   margin-top: 1rem;
 }
 .breadcrumb a { color: var(--color-eyebrow-on-photo); }
+
+/* Small type on a photo: eyebrows and the breadcrumb line. */
+.hero__eyebrow,
+.page-hero__eyebrow,
+.breadcrumb,
+.parallax-section__content .section-header__eyebrow {
+  text-shadow: var(--text-glow-label);
+}
 .breadcrumb a:hover { text-decoration: underline; }
 .breadcrumb span { margin: 0 0.5rem; color: rgba(255,255,255,0.6); }
 
@@ -688,10 +709,10 @@ p + p { margin-top: 1rem; }
     rgba(var(--scrim-tint), calc(var(--scrim-peak) * 0.38)) 80%,
     rgba(var(--scrim-tint), var(--scrim-edge)) 100%);
 }
-/* Per-photo scrim strength for the image bands. */
-.parallax-section--topping     { --scrim-peak: 0.80; --scrim-edge: 0.04; }
-.parallax-section--fleet       { --scrim-peak: 0.78; --scrim-edge: 0.04; }
-.parallax-section--connections { --scrim-peak: 0.64; --scrim-edge: 0.06; }
+/* Per-photo tint for the image bands. Light, same reasoning as the banners. */
+.parallax-section--topping     { --scrim-peak: 0.26; --scrim-edge: 0.03; }
+.parallax-section--fleet       { --scrim-peak: 0.26; --scrim-edge: 0.03; }
+.parallax-section--connections { --scrim-peak: 0.22; --scrim-edge: 0.04; }
 
 /* Below the column breakpoint the copy stops sitting in a lane and runs the
    full width, so there is no clean side left to release. The scrim turns into a
@@ -720,7 +741,7 @@ p + p { margin-top: 1rem; }
   position: relative;
   z-index: 2;
   color: var(--color-white);
-  text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+  text-shadow: var(--text-glow);
 }
 .parallax-section h1, .parallax-section h2, .parallax-section h3 { color: var(--color-white); }
 .parallax-section p { color: rgba(255,255,255,0.92); }
